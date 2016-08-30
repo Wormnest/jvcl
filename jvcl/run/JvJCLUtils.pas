@@ -8555,6 +8555,13 @@ begin
       Result := SysColorValues[Index].Description;
       Exit;
     end;
+  // 2012-04-25 jgb Add support for clDefault and clNone (could maybe be added to SysColorValues)
+  for Index := Low(MiscColorValues) to High(MiscColorValues) do
+    if Value = MiscColorValues[Index].Value then
+    begin
+      Result := MiscColorValues[Index].Description;
+      Exit;
+    end;
   Result := ColorToString(Value);
 end;
 

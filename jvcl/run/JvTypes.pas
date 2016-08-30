@@ -492,6 +492,12 @@ const
     (Value: clMenuHighlight;           Constant: 'clMenuHighlight';          Description: RsMenuHighlight)
   );
 
+  // 2012-04-25 jgb Added clDefault and clNone
+  MiscColorValues: array [0 .. 1] of TDefColorItem = (
+    (Value: clNone;                Constant: 'clNone';                Description: RsClNone),
+    (Value: clDefault;             Constant: 'clDefault';             Description: RsClDefault)
+  );
+
 type
   TJvCustomThread = class(TThread)
   private

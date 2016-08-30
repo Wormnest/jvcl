@@ -2216,6 +2216,9 @@ resourcestring
   RsMenuBar ='Menu Bar';
   RsMenuHighlight ='Menu Highlight';
 
+  // 2012-04-25 jgb Add clDefault and clNone
+  RsClNone = 'None';
+  RsClDefault = 'Default';
 
 //=== JvUrlGrabbers.pas ======================================================
 resourcestring
