@@ -48,6 +48,7 @@ uses
   {$ENDIF UNITVERSIONING}
   Windows, ActiveX, ComObj, CommCtrl, Messages, SysUtils, Classes, Controls,
   OleCtnrs,
+  Contnrs,  // jgb 2012-01-16 moved from implementation
   Forms, Graphics, StdCtrls, Dialogs, RichEdit, Menus, ComCtrls, SyncObjs,
   JvExStdCtrls, JvTypes;
 
@@ -479,6 +480,24 @@ type
     function ErrorStr: string; override;
   end;
 
+  // jgb 2012-01-16 moved from implementation to interface...
+  TConversionFormatList = class(TObjectList)
+  private
+    FRTFConvIndex: Integer;
+    FTextConvIndex: Integer;
+    function GetItem(Index: Integer): TJvConversion;
+  public
+    constructor Create; virtual;
+    { GetConverter implicitly calls Result.Init, thus caller must call Result.Done }
+    function GetConverter(AParentWindow: THandle; const AFileName: string;
+      const Kind: TJvConversionKind): TJvConversion; overload;
+    function GetConverter(AParentWindow: THandle; AStream: TStream;
+      const Kind: TJvConversionKind): TJvConversion; overload;
+    function GetFilter(const AKind: TJvConversionKind): string;
+    function DefaultConverter: TJvConversion;
+    property Items[Index: Integer]: TJvConversion read GetItem {write SetItem}; default;
+  end;
+
   TUndoName = (unUnknown, unTyping, unDelete, unDragDrop, unCut, unPaste);
   TRichSearchType = (stWholeWord, stMatchCase, stBackward, stSetSelection);
   TRichSearchTypes = set of TRichSearchType;
@@ -636,7 +655,11 @@ type
     procedure ColorChanged; override;
     procedure FontChanged; override;
 
-    function GetConverter(const AFileName: string; const Kind: TJvConversionKind): TJvConversion; overload;
+    // jgb 2012-01-16 added this function because I need access to the ConversionFormatList...
+    function GetConversionFormatList: TConversionFormatList;
+
+    // jgb 2012-01-16 added virtual to function below so I can change it
+    function GetConverter(const AFileName: string; const Kind: TJvConversionKind): TJvConversion; overload; virtual;
     function GetConverter(AStream: TStream; const Kind: TJvConversionKind): TJvConversion; overload;
 
     procedure CreateParams(var Params: TCreateParams); override;
@@ -987,7 +1010,7 @@ uses
   System.UITypes,
   {$ENDIF HAS_UNIT_SYSTEM_UITYPES}
   Types,
-  Printers, ComStrs, OleConst, OleDlg, Math, Registry, Contnrs,
+  Printers, ComStrs, OleConst, OleDlg, Math, Registry,
   {$IFDEF RTL200_UP}
   CommDlg,
   {$ENDIF RTL200_UP}
@@ -1115,23 +1138,6 @@ type
       var dwEffect: DWORD): HRESULT; stdcall;
     function GetContextMenu(seltype: Word; const oleobj: IOleObject;
       const chrg: TCharRange; out Menu: HMENU): HRESULT; stdcall;
-  end;
-
-  TConversionFormatList = class(TObjectList)
-  private
-    FRTFConvIndex: Integer;
-    FTextConvIndex: Integer;
-    function GetItem(Index: Integer): TJvConversion;
-  public
-    constructor Create; virtual;
-    { GetConverter implicitly calls Result.Init, thus caller must call Result.Done }
-    function GetConverter(AParentWindow: THandle; const AFileName: string;
-      const Kind: TJvConversionKind): TJvConversion; overload;
-    function GetConverter(AParentWindow: THandle; AStream: TStream;
-      const Kind: TJvConversionKind): TJvConversion; overload;
-    function GetFilter(const AKind: TJvConversionKind): string;
-    function DefaultConverter: TJvConversion;
-    property Items[Index: Integer]: TJvConversion read GetItem {write SetItem}; default;
   end;
 
   TImageDataObject = class(TInterfacedObject, IDataObject)
@@ -3190,6 +3196,12 @@ begin
     Result.Init(GetParentWindow(Self));
 end;
 
+// jgb 2012-01-16 added this function because I need access to the ConversionFormatList...
+function TJvCustomRichEdit.GetConversionFormatList: TConversionFormatList;
+begin
+  Result := GConversionFormatList;
+end;
+
 function TJvCustomRichEdit.GetConverter(const AFileName: string;
   const Kind: TJvConversionKind): TJvConversion;
 begin
@@ -4664,14 +4676,38 @@ end;
 function TJvCustomRichEdit.WordAtCursor: string;
 var
   Range: TCharRange;
+  /// JGB my version from 2008 backported to the latest (sept 2012) ver of JvRichEdit
+  // JGB:
+  function IsDelimOrWhite(Position: Integer): Boolean;
+  var Classification: Integer;
+  begin
+    // TODO: Can be done in one line
+    Classification := SendMessage(Handle, EM_FINDWORDBREAK, WB_CLASSIFY, Position);
+    Result := Classification and (WBF_BREAKLINE+WBF_ISWHITE) <> 0;
+  end;
 begin
   Result := '';
   if HandleAllocated then
   begin
     Range.cpMax := SelStart;
+{ jgb: NOT NECESSARY part from original
     if Range.cpMax = 0 then
       Range.cpMin := 0
     else
+}
+    // Notes: end of paragraph (hard return) position does not denote a delimiter!
+// JGB debugging aanpassingen
+    if IsDelimOrWhite(Range.cpMax) then
+    begin
+      // when we're on a delimiter or whitespace we never need to search to the right for a word!
+      Range.cpMin := SendMessage(Handle, EM_FINDWORDBREAK, WB_MOVEWORDLEFT, Range.cpMax);
+    end
+    else
+    begin
+      Range.cpMin := SendMessage(Handle, EM_FINDWORDBREAK, WB_MOVEWORDLEFT, Range.cpMax+1);
+      Range.cpMax := SendMessage(Handle, EM_FINDWORDBREAK, WB_MOVEWORDRIGHT, Range.cpMin);
+    end;
+{ JGB: origineel
     if SendMessage(Handle, EM_FINDWORDBREAK, WB_ISDELIMITER, Range.cpMax) <> 0 then
       Range.cpMin := SendMessage(Handle, EM_FINDWORDBREAK, WB_MOVEWORDLEFT, Range.cpMax)
     else
@@ -4679,6 +4715,7 @@ begin
     while SendMessage(Handle, EM_FINDWORDBREAK, WB_ISDELIMITER, Range.cpMin) <> 0 do
       Inc(Range.cpMin);
     Range.cpMax := SendMessage(Handle, EM_FINDWORDBREAK, WB_RIGHTBREAK, Range.cpMax);
+}
     Result := Trim(GetTextRange(Range.cpMin, Range.cpMax));
   end;
 end;
