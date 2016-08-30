@@ -39,7 +39,8 @@ uses
   System.UITypes,
   {$ENDIF HAS_UNIT_SYSTEM_UITYPES}  
   ExtCtrls, ImgList, Menus,
-  JvWndProcHook, JVCLVer;
+  JvWndProcHook, JVCLVer,
+  JgbTranslateShortcut; // JB Needs to be after Menus!
 
 const
   // custom painter constants
