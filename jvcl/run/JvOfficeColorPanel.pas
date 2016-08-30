@@ -1337,7 +1337,8 @@ begin
     Tag := FButtonCustomColor.Tag + 1;
     Flat := True;
     DrawColor := clDefault;
-    Hint := ColorToString(DrawColor);
+    // 2012-04-25 jgb We want a pretty name for clDefault instead of ColorToString(DrawColor);
+    Hint := ColorToPrettyName(DrawColor);
     CanDrawColorQuad := True;
     CanDrawGlyph := False;
     CanDrawInnerFrame := False;
