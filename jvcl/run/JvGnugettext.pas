@@ -1838,7 +1838,11 @@ begin
           else
             DebugWriteln ('Old value: "'+old+'"');
           {$endif}
-          if (old <> '') and (IsWriteProp(PropInfo)) then begin
+//          if (old <> '') and (IsWriteProp(PropInfo)) then begin
+          // jgb 2012-04-20 replaced above with below because of problems with
+          // retranslating a JvMainMenu linked with Actions on a CoolBar
+          // see also: http://tech.groups.yahoo.com/group/dxgettext/message/3514
+          if (old <> '') and (IsStoredProp(AnObject, PropInfo)) then begin
             if TP_Retranslator<>nil then
               (TP_Retranslator as TTP_Retranslator).Remember(AnObject, PropName, old);
             if textdomain = '' then
