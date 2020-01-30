@@ -28,6 +28,7 @@
     <File Name="..\..\run\JvListView.pas" Targets="all" Formname="" Condition=""/>
     <File Name="..\..\run\JvMaskEdit.pas" Targets="all" Formname="" Condition=""/>
     <File Name="..\..\run\JvMemo.pas" Targets="all" Formname="" Condition=""/>
+    <File Name="..\..\run\JgbTranslateShortcut.pas" Targets="all" Formname="" Condition=""/>
     <File Name="..\..\run\JvMenus.pas" Targets="all" Formname="" Condition=""/>
     <File Name="..\..\run\JvMonthCalendar.pas" Targets="all" Formname="" Condition=""/>
     <File Name="..\..\run\JvPanel.pas" Targets="all" Formname="" Condition=""/>
