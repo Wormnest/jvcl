@@ -76,6 +76,7 @@
         <DCCReference Include="..\..\run\JvListView.pas"/>
         <DCCReference Include="..\..\run\JvMaskEdit.pas"/>
         <DCCReference Include="..\..\run\JvMemo.pas"/>
+        <DCCReference Include="..\..\run\JgbTranslateShortcut.pas"/>
         <DCCReference Include="..\..\run\JvMenus.pas"/>
         <DCCReference Include="..\..\run\JvMonthCalendar.pas"/>
         <DCCReference Include="..\..\run\JvPanel.pas"/>
