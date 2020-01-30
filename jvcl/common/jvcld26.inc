@@ -39,7 +39,7 @@ Known Issues:
 
 { Enable this define if you have the dxgettext (http://dxgettext.sourceforge.net)
 translation tool installed and want to use it with the JVCL. }
-{.$DEFINE USE_DXGETTEXT}
+{$DEFINE USE_DXGETTEXT}
 
 { Enable this define if you use/have QuickReport }
 {.$DEFINE JVCL_UseQuickReport}
