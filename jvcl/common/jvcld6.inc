@@ -24,7 +24,7 @@ Known Issues:
 
 {%hidden%}
 { Enable this define if you are using the Delphi 6, 7 or 2005 Personal Edition. }
-{.$DEFINE DelphiPersonalEdition}
+{$DEFINE DelphiPersonalEdition}
 
 {%hidden%}
 { The installer enables this define if you compile JVCL for Delphi and C++ Builder. It disables
